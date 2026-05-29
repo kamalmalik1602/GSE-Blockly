@@ -1,0 +1,60 @@
+name: Test Report
+
+on:
+  push:
+    branches:
+      - "**"
+      - "!badges"
+
+permissions:
+  contents: write
+
+jobs:
+  test:
+    name: Run tests and publish report
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    # Skip the Classroom bot's initial push — setup.yml handles that one
+    if: github.actor != 'github-classroom[bot]'
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Run tests and generate report.md
+        id: test
+        run: python automate/testReport.py || true
+        # || true so the step never fails — test outcomes are reflected in report.md and the points badge
+
+      - name: Switch to badges branch
+        run: git checkout badges || git checkout -b badges
+
+      - name: Create points bar
+        uses: markpatterson27/points-bar@v1
+        with:
+          points: ${{ steps.test.outputs.points }}
+          path: ".github/badges/points-bar.svg"
+
+      - name: Commit and push report + badge
+        run: |
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git config user.name "github-actions[bot]"
+          git add report.md .github/badges/points-bar.svg
+          git commit -m "chore: update test report and badge [skip ci]" || exit 0
+          git push -f origin badges

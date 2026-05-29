@@ -1,0 +1,42 @@
+{
+  "blocks": {
+    "languageVersion": 0,
+    "blocks": [
+      {
+        "type": "rbac_policy",
+        "fields": {
+          "NAME": "SocialMediaModeration"
+        },
+        "inputs": {
+          "ROLES": {
+            "block": {
+              "type": "rbac_role",
+              "fields": {
+                "ROLE": "TRUSTANDSAFETYLEAD"
+              }
+            }
+          },
+          "RULES": {
+            "block": {
+              "type": "rbac_rule",
+              "fields": {
+                "EFFECT": "ALLOW",
+                "ACTION": "BAN"
+              },
+              "inputs": {
+                "RESOURCES": {
+                  "block": {
+                    "type": "rbac_resource",
+                    "fields": {
+                      "RES": "USERACCOUNTS"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    ]
+  }
+}
